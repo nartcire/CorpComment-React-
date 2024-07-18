@@ -1,4 +1,4 @@
-import { MAX_CHARACTERS } from "../lib/constants";
+import { MAX_CHARACTERS } from "../../lib/constants";
 import { useState } from "react";
 
 type FeedBackFormProps = {

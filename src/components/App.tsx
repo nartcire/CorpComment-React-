@@ -1,16 +1,29 @@
 import { useEffect, useState } from "react";
 
-import Container from "./Container";
-import Footer from "./Footer";
-import HashtagList from "./HashtagList";
+import Container from "./layout/Container";
+import Footer from "./layout/Footer";
+import HashtagList from "./hashtag/HashtagList";
 import { TFeedbackItem } from "../lib/types";
 
 function App() {
   const [feedbackItems, setFeedbackItems] = useState<TFeedbackItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState("ByteGrad");
 
-  const handleAddToList = (text: string) => {
+  const filteredFeedbackItems = selectedCompany
+    ? feedbackItems.filter(
+        (feedbackItem) => feedbackItem.company === selectedCompany
+      )
+    : feedbackItems;
+
+  const companyList = feedbackItems
+    .map((item) => item.company)
+    .filter((company, index, array) => {
+      return array.indexOf(company) === index;
+    });
+
+  const handleAddToList = async (text: string) => {
     const companyName = text
       .split(" ")
       .find((word) => word.includes("#"))!
@@ -20,11 +33,27 @@ function App() {
       text: text,
       upvoteCount: 0,
       daysAgo: 0,
-      companyName: companyName,
+      company: companyName,
       badgeLetter: companyName.substring(0, 1).toUpperCase(),
     };
 
     setFeedbackItems([...feedbackItems, newItem]);
+
+    await fetch(
+      "https://bytegrad.com/course-assets/projects/corpcomment/api/feedbacks",
+      {
+        method: "POST",
+        body: JSON.stringify(newItem),
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  };
+
+  const handleSelectCompany = (company: string) => {
+    setSelectedCompany(company);
   };
 
   useEffect(() => {
@@ -57,11 +86,14 @@ function App() {
       <Footer />
       <Container
         isLoading={isLoading}
-        feedbackItems={feedbackItems}
+        feedbackItems={filteredFeedbackItems}
         errorMessage={errorMessage}
         handleAddToList={handleAddToList}
       />
-      <HashtagList />
+      <HashtagList
+        handleSelectCompany={handleSelectCompany}
+        companyList={companyList}
+      />
     </div>
   );
 }
