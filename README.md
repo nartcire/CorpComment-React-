@@ -1,4 +1,4 @@
-# CorpComment (React)
+# Corp Comment (React)
 
 A web app that aims at reinforcing concepts in React.js while also exploring the React Context API and Zustand for context managemenet.
 
